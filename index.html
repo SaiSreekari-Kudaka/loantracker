@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TribalEase • Empowering Tribals Financially</title>
+
+  <!-- Fonts + Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <!-- Chart.js + jsPDF + Tesseract -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+
+  <style>
+    :root {
+      --bg:#0b1220; --bg-soft:#0f172a; --fg:#e6eefc;
+      --panel: rgba(18,27,45,.78); --glass: rgba(18,27,45,.58); --stroke: rgba(148,163,184,.18);
+      --muted:#9fb0c8; --accent:#14b8a6; --accent-2:#06b6d4; --ok:#22c55e; --warn:#f59e0b;
+    }
+    :root.light {
+      --bg:#f5f7fb; --bg-soft:#ffffff; --fg:#0b1324;
+      --panel: rgba(255,255,255,.92); --glass: rgba(255,255,255,.74); --stroke: rgba(11,19,36,.12);
+      --muted:#4b5563; --accent:#0ea5e9; --accent-2:#10b981; --ok:#16a34a; --warn:#b45309;
+    }
+
+    * { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { background: linear-gradient(180deg, var(--bg), var(--bg-soft)); color: var(--fg); transition: background-color .25s ease, color .25s ease; }
+    .pattern {
+      position: absolute; inset: -10% -10% auto -10%; height: 60vh; pointer-events:none;
+      background:
+        radial-gradient(ellipse at top, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%),
+        radial-gradient(ellipse at left, color-mix(in srgb, var(--warn) 14%, transparent), transparent 60%),
+        radial-gradient(ellipse at right, color-mix(in srgb, var(--ok) 18%, transparent), transparent 60%);
+      filter: blur(46px);
+      animation: float 14s ease-in-out infinite alternate;
+    }
+    @keyframes float { from { transform: translateY(-8px) } to { transform: translateY(8px) } }
+    .fade { animation: fade .5s ease-out both; } @keyframes fade { from{opacity:.0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+    .app-grid { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; gap: 0; }
+    @media (max-width: 1024px) { .app-grid { grid-template-columns: 1fr; } .sidebar { position: sticky; top: 0; z-index: 20 } }
+
+    .sidebar { background: color-mix(in srgb, var(--bg-soft) 90%, transparent); backdrop-filter: blur(10px); border-right: 1px solid var(--stroke) }
+    .nav-btn { display:flex; gap:.65rem; align-items:center; width:100%; padding:.65rem .85rem; border-radius:.8rem; color: color-mix(in srgb, var(--fg) 75%, var(--muted)); }
+    .nav-btn:hover { background: color-mix(in srgb, var(--bg-soft) 12%, transparent); color:var(--fg); }
+    .nav-btn.active { background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent-2) 18%, transparent)); color:var(--fg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent) }
+    .panel { background: var(--panel); border:1px solid var(--stroke); border-radius:1rem; padding:1.25rem }
+    .glass { background: var(--glass); border:1px solid var(--stroke); border-radius:1rem; }
+    .btn { border-radius:.8rem; padding:.62rem .95rem; }
+    .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:#05151a }
+    .toggle { display:inline-flex; align-items:center; gap:.5rem; padding:.45rem .6rem; border-radius:.75rem; background: color-mix(in srgb, var(--bg-soft) 85%, transparent); border:1px solid var(--stroke) }
+    .kbd { border:1px solid var(--stroke); padding:.1rem .35rem; border-radius:.35rem; font-size:.8rem; color: color-mix(in srgb, var(--fg) 70%, var(--muted)) }
+    .section { animation: fade .25s ease-out, slideUp .25s ease-out } @keyframes slideUp { from{transform:translateY(6px)} to{transform:none} }
+    .ribbon { border:1px solid color-mix(in srgb, var(--ok) 26%, var(--stroke)); background: linear-gradient(180deg, color-mix(in srgb, var(--ok) 12%, transparent), transparent); border-radius:1rem; }
+    .input { background: color-mix(in srgb, var(--bg-soft) 86%, transparent); border:1px solid var(--stroke); border-radius:.7rem; padding:.6rem .75rem; color: var(--fg) }
+    .muted { color: color-mix(in srgb, var(--fg) 70%, var(--muted)); }
+  </style>
+</head>
+
+<body>
+  <!-- LANDING PAGE -->
+  <section id="landing" class="min-h-screen flex items-center justify-center px-6 relative">
+    <div class="pattern"></div>
+    <div class="max-w-3xl mx-auto text-center">
+      <div class="mx-auto mb-8 w-[120px] h-[120px] grid place-items-center">
+        <div class="w-[108px] h-[108px] rounded-full border border-[color-mix(in_srgb,var(--accent)_40%,transparent)] grid place-items-center">
+          <div class="w-9 h-9 rotate-45 border-2 border-[color:var(--warn)]"></div>
+        </div>
+      </div>
+
+      <h1 id="titleHero" class="text-4xl md:text-6xl font-extrabold fade">TribalEase — Empowering Tribals Financially</h1>
+      <p id="descHero" class="mt-4 text-lg muted fade">A unified platform for tribal communities to calculate loan interest, track borrowings, and explore bank loan details easily.</p>
+
+      <div class="mt-8 flex items-center justify-center gap-3 fade">
+        <button id="getStarted" class="btn btn-primary"><i class="fa-solid fa-rocket mr-2"></i><span data-i18n="getStarted">Get Started</span></button>
+        <button id="toggleThemeLanding" class="toggle" aria-label="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+      </div>
+
+      <p class="mt-4 text-sm muted fade" id="landingTag">Plan your money, own your future</p>
+
+      <div class="mt-8 text-xs muted" id="qod" role="note" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- APP DASHBOARD -->
+  <section id="app" class="hidden app-grid">
+    <!-- Sidebar -->
+    <aside class="sidebar p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-full border border-[color-mix(in_srgb,var(--accent)_40%,transparent)] grid place-items-center"><div class="w-3 h-3 rotate-45 border border-[color:var(--warn)]"></div></div>
+        <h2 class="font-extrabold text-lg"><span data-i18n="appName">TribalEase</span></h2>
+        <button id="themeToggle" class="ml-auto toggle" aria-label="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+      </div>
+
+      <div class="mb-3">
+        <label class="text-xs muted mb-1 block" for="langSel"><span data-i18n="language">Language</span></label>
+        <select id="langSel" class="input w-full">
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="hi">हिन्दी (Hindi)</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <nav class="space-y-2" aria-label="Primary">
+        <button class="nav-btn transition-all duration-200 hover:scale-[1.04] hover:ring-2 hover:ring-[color:var(--accent)] active" data-section="calculator"><i class="fa-solid fa-calculator"></i><span data-i18n="navCalc">Interest Calculator</span></button>
+        <button class="nav-btn transition-all duration-200 hover:scale-[1.04] hover:ring-2 hover:ring-[color:var(--accent)]" data-section="tracker"><i class="fa-solid fa-list-check"></i><span data-i18n="navTracker">Loan Tracker</span></button>
+        <button class="nav-btn transition-all duration-200 hover:scale-[1.04] hover:ring-2 hover:ring-[color:var(--accent)]" data-section="compare"><i class="fa-solid fa-scale-balanced"></i><span data-i18n="navCompare">Compare Loans</span></button>
+        <button class="nav-btn transition-all duration-200 hover:scale-[1.04] hover:ring-2 hover:ring-[color:var(--accent)]" data-section="voice"><i class="fa-solid fa-microphone"></i><span data-i18n="navVoice">Voice</span></button>
+        <button class="nav-btn transition-all duration-200 hover:scale-[1.04] hover:ring-2 hover:ring-[color:var(--accent)]" data-section="bank"><i class="fa-solid fa-building-columns"></i><span data-i18n="navBank">Bank Info</span></button>
+      </nav>
+
+      <div class="mt-6 text-xs muted">
+        <span data-i18n="tips">Tips</span>: <span class="kbd">Ctrl</span>+<span class="kbd">1..5</span>
+        <button id="backToLanding" class="mt-3 w-full nav-btn"><i class="fa-solid fa-arrow-left"></i><span data-i18n="backLanding">Back to Landing</span></button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main" class="p-5 space-y-5"></main>
+  </section>
+
+  <!-- App JS -->
+  <script src="./app.js"></script>
+</body>
+</html>
